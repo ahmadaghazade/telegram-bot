@@ -4,15 +4,12 @@ namespace Tests\Feature\Endpoints;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
-
     use RefreshDatabase;
-
 
     public function test_user_can_register()
     {
@@ -71,7 +68,7 @@ class AuthTest extends TestCase
 
         // Use the token in the Authorization header
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson('/api/logout');
 
         $response->assertOk()

@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Post extends Model
 {
     use HasFactory;
-    protected $fillable = ['title', 'body', 'user_id', 'telegram_message_id'];
 
+    protected $fillable = ['title', 'body', 'user_id', 'telegram_message_id'];
 
     public function user(): BelongsTo
     {

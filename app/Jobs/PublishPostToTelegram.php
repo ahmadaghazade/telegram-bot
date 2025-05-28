@@ -13,14 +13,14 @@ use Illuminate\Support\Facades\Log;
 
 class PublishPostToTelegram implements ShouldQueue
 {
-    use Queueable, InteractsWithQueue, SerializesModels, Dispatchable;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
      */
-
     protected $post;
-    public function __construct(Post  $post)
+
+    public function __construct(Post $post)
     {
         $this->post = $post;
     }
@@ -30,7 +30,7 @@ class PublishPostToTelegram implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info("Publishing Post to Telegram");
+        Log::info('Publishing Post to Telegram');
 
         $botToken = config('services.telegram.bot_token');
         $channel = config('services.telegram.channel');
@@ -53,9 +53,9 @@ class PublishPostToTelegram implements ShouldQueue
                 $this->post->telegram_message_id = $data['result']['message_id'];
                 $this->post->save();
             }
-            Log::info("Telegram Response", $response->json());
+            Log::info('Telegram Response', $response->json());
         } catch (\Exception $e) {
-            Log::error("Telegram Send Failed: " . $e->getMessage());
+            Log::error('Telegram Send Failed: '.$e->getMessage());
         }
     }
 }

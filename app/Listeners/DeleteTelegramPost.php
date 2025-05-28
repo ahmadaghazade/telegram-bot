@@ -15,16 +15,14 @@ class DeleteTelegramPost implements ShouldQueue
     /**
      * Create the event listener.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Handle the event.
      */
     public function handle(PostDeleted $event): void
     {
-        Log::info('Listener DeleteTelegramPost is triggered for post ID: ' . $event->post->id);
+        Log::info('Listener DeleteTelegramPost is triggered for post ID: '.$event->post->id);
 
         DeleteTelegramMessage::dispatch($event->post);
     }

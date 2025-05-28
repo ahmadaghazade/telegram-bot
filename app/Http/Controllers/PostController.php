@@ -8,7 +8,6 @@ use App\Events\PostUpdated;
 use App\Http\Requests\PostStoreRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Jobs\DeleteTelegramMessage;
-use App\Jobs\UpdateTelegramMessage;
 use App\Models\Post;
 use Illuminate\Support\Facades\Auth;
 
@@ -43,6 +42,7 @@ class PostController extends Controller
     {
         $post->update($request->validated());
         PostUpdated::dispatch($post);
+
         return response($post, 200);
     }
 
@@ -54,9 +54,10 @@ class PostController extends Controller
         try {
             if ($post->telegram_message_id) {
                 PostDeleted::dispatch($post);
-//            DeleteTelegramMessage::dispatch($post);
+                //            DeleteTelegramMessage::dispatch($post);
             }
             $post->delete();
+
             return response()->noContent();
         } catch (\Exception $e) {
             return response($e->getMessage(), 500);

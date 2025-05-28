@@ -34,7 +34,7 @@ class AuthController extends Controller
     {
         try {
 
-            if (!Auth::attempt($request->only('email', 'password'))) {
+            if (! Auth::attempt($request->only('email', 'password'))) {
                 return response()->json([
                     'message' => 'invlid email or password',
                 ], 401);
@@ -43,6 +43,7 @@ class AuthController extends Controller
             $user = Auth::user();
             $user->tokens()->delete();
             $token = $user->createToken('auth_token')->plainTextToken;
+
             return response()->json([
                 'message' => 'User logged in successfully',
                 'user' => $user,
@@ -59,6 +60,7 @@ class AuthController extends Controller
     public function logout(): \Illuminate\Http\JsonResponse
     {
         auth()->user()->tokens()->delete();
+
         return response()->json([
             'message' => 'User logged out successfully',
         ]);

@@ -28,7 +28,7 @@ class PostTest extends TestCase
         $token = $user->createToken('test-token')->plainTextToken;
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson('/api/posts', [
             'title' => 'Test Post Title',
             'body' => 'Test Post Body',
@@ -39,7 +39,7 @@ class PostTest extends TestCase
         Event::assertDispatched(PostCreated::class);
 
         // Simulate listener manually, or allow it
-        Event::fakeFor(function () use ($response) {
+        Event::fakeFor(function () {
             $post = \App\Models\Post::latest()->first();
             PublishPostToTelegram::dispatch($post);
         });
@@ -66,7 +66,7 @@ class PostTest extends TestCase
         ]);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->putJson("/api/posts/{$post->id}", [
             'title' => 'Updated Title',
             'body' => 'Updated Body',
@@ -98,7 +98,7 @@ class PostTest extends TestCase
         ]);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->deleteJson("/api/posts/{$post->id}");
 
         $response->assertNoContent();
@@ -120,7 +120,7 @@ class PostTest extends TestCase
         $post = Post::factory()->create(['user_id' => $user->id]);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->getJson("/api/posts/{$post->id}");
 
         $response->assertOk()
@@ -138,7 +138,7 @@ class PostTest extends TestCase
         Post::factory()->count(3)->create(['user_id' => $user->id]);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->getJson('/api/posts');
 
         $response->assertOk()

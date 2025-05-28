@@ -24,7 +24,7 @@ class PostFactory extends Factory
             'title' => $this->faker->sentence,
             'body' => $this->faker->paragraph,
             'user_id' => User::factory(),
-            'telegram_message_id' => 123456
+            'telegram_message_id' => 123456,
         ];
     }
 }

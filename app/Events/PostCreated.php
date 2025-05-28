@@ -13,7 +13,5 @@ class PostCreated
     /**
      * Create a new event instance.
      */
-    public function __construct(public Post $post){}
-
-
+    public function __construct(public Post $post) {}
 }

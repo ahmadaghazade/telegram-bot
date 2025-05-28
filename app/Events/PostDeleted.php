@@ -10,5 +10,5 @@ class PostDeleted
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public Post $post){}
+    public function __construct(public Post $post) {}
 }

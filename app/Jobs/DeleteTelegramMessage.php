@@ -27,15 +27,16 @@ class DeleteTelegramMessage implements ShouldQueue
     public function handle(): void
     {
         try {
-            Log::info('Post ID in job: ' . $this->post->id);
-            Log::info('Telegram Message ID: ' . $this->post->telegram_message_id);
+            Log::info('Post ID in job: '.$this->post->id);
+            Log::info('Telegram Message ID: '.$this->post->telegram_message_id);
 
-            Log::info("telegram message delete job dispatched");
+            Log::info('telegram message delete job dispatched');
             $botToken = config('services.telegram.bot_token');
             $chatId = config('services.telegram.channel');
             $messageId = $this->post->telegram_message_id;
-            if (!$messageId) {
+            if (! $messageId) {
                 Log::warning("No Telegram message ID for post ID {$this->post->id}");
+
                 return;
             }
 

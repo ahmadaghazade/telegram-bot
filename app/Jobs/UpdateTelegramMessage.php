@@ -24,7 +24,7 @@ class UpdateTelegramMessage implements ShouldQueue
     public function handle(): void
     {
         try {
-            Log::info("update telegram message");
+            Log::info('update telegram message');
             $botToken = config('services.telegram.bot_token');
             $channel = config('services.telegram.channel');
 
