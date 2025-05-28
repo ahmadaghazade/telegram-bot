@@ -3,22 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Events\PostCreated;
+use App\Events\PostDeleted;
+use App\Events\PostUpdated;
 use App\Http\Requests\PostStoreRequest;
-use App\Jobs\PublishPostToTelegram;
+use App\Http\Requests\UpdatePostRequest;
+use App\Jobs\DeleteTelegramMessage;
+use App\Jobs\UpdateTelegramMessage;
 use App\Models\Post;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
     public function index()
     {
-        return Post::where('user_id', Auth::id())->paginate(10);
+        return Post::where('user_id', Auth::id())->get();
     }
 
     public function store(PostStoreRequest $request)
     {
-        $post =  auth()->user()->posts()->create($request->validated());
+        $post = auth()->user()->posts()->create($request->validated());
 
         PostCreated::dispatch($post);
 
@@ -36,13 +39,10 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post)
     {
-        $validated = $request->validate([
-            'title' => 'required',
-            'content' => 'required'
-        ]);
-        $post->update($validated);
+        $post->update($request->validated());
+        PostUpdated::dispatch($post);
         return response($post, 200);
     }
 
@@ -52,6 +52,10 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         try {
+            if ($post->telegram_message_id) {
+                PostDeleted::dispatch($post);
+//            DeleteTelegramMessage::dispatch($post);
+            }
             $post->delete();
             return response()->noContent();
         } catch (\Exception $e) {

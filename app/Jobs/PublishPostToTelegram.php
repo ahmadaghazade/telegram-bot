@@ -37,7 +37,6 @@ class PublishPostToTelegram implements ShouldQueue
 
         $message = "*{$this->post->title}*\n{$this->post->body}";
         $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
-        Log::info("Telegram URL: " . $url);
 
         try {
             $response = Http::withOptions([
@@ -49,6 +48,11 @@ class PublishPostToTelegram implements ShouldQueue
                 'parse_mode' => 'Markdown',
             ]);
 
+            $data = $response->json();
+            if (isset($data['result']['message_id'])) {
+                $this->post->telegram_message_id = $data['result']['message_id'];
+                $this->post->save();
+            }
             Log::info("Telegram Response", $response->json());
         } catch (\Exception $e) {
             Log::error("Telegram Send Failed: " . $e->getMessage());

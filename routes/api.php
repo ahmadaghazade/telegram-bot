@@ -9,13 +9,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::get('/posts', [PostController::class, 'index'])->middleware('auth:sanctum');
+Route::get('/posts/{post}', [PostController::class, 'show'])->middleware('auth:sanctum');
+Route::put('/posts/{post}', [PostController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('/posts/{post}', [PostController::class, 'destroy'])->middleware('auth:sanctum');
 Route::post('/posts', [PostController::class, 'store'])->middleware('auth:sanctum');
 
-
-Route::get('/test-vpn', function () {
-    $response = Http::withOptions([
-        'proxy' => 'socks5://127.0.0.1:12334',
-    ])->get('https://api.telegram.org');
-
-    return $response->body();
-});
