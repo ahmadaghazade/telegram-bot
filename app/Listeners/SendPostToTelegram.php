@@ -24,6 +24,7 @@ class SendPostToTelegram implements ShouldQueue
      */
     public function handle(PostCreated $event): void
     {
+        Log::info('PostCreated event handled in test', ['post_id' => $event->post->id]);
         PublishPostToTelegram::dispatch($event->post);
     }
 }
