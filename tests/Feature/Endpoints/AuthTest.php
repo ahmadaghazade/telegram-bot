@@ -23,7 +23,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertCreated()
-            ->assertJsonStructure(['token', 'user' => ['id', 'name', 'email']]);
+            ->assertJsonStructure(['token', 'data' => ['id', 'name', 'email']]);
         $this->assertDatabaseHas('users', ['email' => 'test@gmail.com']);
     }
 
@@ -44,7 +44,7 @@ class AuthTest extends TestCase
         if ($expect) {
             $response
                 ->assertOk()
-                ->assertJsonStructure(['token', 'user' => ['id', 'name', 'email']]);
+                ->assertJsonStructure(['token', 'data' => ['id', 'name', 'email']]);
         } else {
             $response->assertUnauthorized();
         }
