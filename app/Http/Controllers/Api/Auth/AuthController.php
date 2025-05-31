@@ -7,62 +7,53 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request): \Illuminate\Http\JsonResponse
+    public function register(RegisterRequest $request): array
     {
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
+        return [
             'message' => 'User created successfully',
             'user' => $user,
             'token' => $token,
-        ], 201);
+        ];
 
     }
 
-    public function login(LoginRequest $request): \Illuminate\Http\JsonResponse
+    public function login(LoginRequest $request): array|Response
     {
-        try {
 
-            if (! Auth::attempt($request->only('email', 'password'))) {
-                return response()->json([
-                    'message' => 'invlid email or password',
-                ], 401);
-            }
-
-            $user = Auth::user();
-            $user->tokens()->delete();
-            $token = $user->createToken('auth_token')->plainTextToken;
-
+        if (! Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
-                'message' => 'User logged in successfully',
-                'user' => $user,
-                'token' => $token,
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => $th->getMessage(),
-            ]);
+                'message' => 'invlid email or password',
+            ], 401);
         }
 
+        $user = Auth::user();
+        //            $user->tokens()->delete();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return [
+            'message' => 'User logged in successfully',
+            'user' => $user,
+            'token' => $token,
+        ];
     }
 
-    public function logout(): \Illuminate\Http\JsonResponse
+    public function logout(): \Illuminate\Http\Response
     {
-        auth()->user()->tokens()->delete();
+        Auth::user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'User logged out successfully',
-        ]);
+        return response()->noContent();
     }
 }

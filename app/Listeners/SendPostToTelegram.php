@@ -6,6 +6,7 @@ use App\Events\PostCreated;
 use App\Jobs\PublishPostToTelegram;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 
 class SendPostToTelegram implements ShouldQueue
 {

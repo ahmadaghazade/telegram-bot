@@ -5,6 +5,8 @@ namespace Tests\Feature\Endpoints;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -25,35 +27,27 @@ class AuthTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'test@gmail.com']);
     }
 
-    public function test_user_can_login()
+    #[DataProvider('loginProvider')]
+    public function test_user_can_login(bool $expect, string $password)
     {
         $user = User::factory()->create([
             'email' => 'test@gmail.com',
-            'password' => Hash::make('password'),
-        ]);
-
-        $response = $this->postJson('/api/login', [
-            'email' => $user->email,
             'password' => 'password',
         ]);
 
-        $response->assertOk()
-            ->assertJsonStructure(['token', 'user' => ['id', 'name', 'email']]);
-    }
+        $response = $this
+            ->postJson('/api/login', [
+                'email' => $user->email,
+                'password' => $password,
+            ]);
 
-    public function test_user_can_not_login_invalid_credentials()
-    {
-        $user = User::factory()->create([
-            'email' => 'test@gmail.com',
-            'password' => Hash::make('password'),
-        ]);
-
-        $response = $this->postJson('/api/login', [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
-
-        $response->assertUnauthorized();
+        if ($expect) {
+            $response
+                ->assertOk()
+                ->assertJsonStructure(['token', 'user' => ['id', 'name', 'email']]);
+        } else {
+            $response->assertUnauthorized();
+        }
     }
 
     public function test_user_can_logout()
@@ -63,19 +57,29 @@ class AuthTest extends TestCase
             'password' => Hash::make('password'),
         ]);
 
-        // Create and assign the token to a variable
-        $token = $user->createToken('test-token')->plainTextToken;
-
+        Sanctum::actingAs($user);
         // Use the token in the Authorization header
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer '.$token,
-        ])->postJson('/api/logout');
-
-        $response->assertOk()
-            ->assertJson(['message' => 'User logged out successfully']);
+        $this
+            ->post('/api/logout')
+            ->dump()
+            ->assertNoContent();
 
         $this->assertDatabaseMissing('personal_access_tokens', [
             'tokenable_id' => $user->id,
         ]);
+    }
+
+    public static function loginProvider(): array
+    {
+        return [
+            [
+                'expect' => true,
+                'password' => 'password',
+            ],
+            [
+                'expect' => false,
+                'password' => 'wrong_password',
+            ],
+        ];
     }
 }

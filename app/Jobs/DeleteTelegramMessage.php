@@ -42,7 +42,7 @@ class DeleteTelegramMessage implements ShouldQueue
 
             $response = Http::withOptions([
                 'proxy' => 'socks5://127.0.0.1:12334',
-            ])->post("https://api.telegram.org/bot{$botToken}/deleteMessage", [
+            ])->post("https://api.telegram.org/bot$botToken/deleteMessage", [
                 'chat_id' => $chatId,
                 'message_id' => $messageId,
             ]);

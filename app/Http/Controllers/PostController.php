@@ -7,24 +7,31 @@ use App\Events\PostDeleted;
 use App\Events\PostUpdated;
 use App\Http\Requests\PostStoreRequest;
 use App\Http\Requests\UpdatePostRequest;
-use App\Jobs\DeleteTelegramMessage;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
     public function index()
     {
-        return Post::where('user_id', Auth::id())->get();
+        return PostResource::collection(
+            Post::where('user_id', Auth::id())->paginate()
+        );
     }
 
-    public function store(PostStoreRequest $request)
+    public function store(PostStoreRequest $request): PostResource
     {
-        $post = auth()->user()->posts()->create($request->validated());
+        $post = Post::create([
+            'user_id' => Auth::id(),
+            'title' => $request->title,
+            'body' => $request->body,
+        ]);
 
         PostCreated::dispatch($post);
 
-        return response($post, 201);
+        return new PostResource($post);
     }
 
     /**
@@ -38,7 +45,7 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePostRequest $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post): Response
     {
         $post->update($request->validated());
         PostUpdated::dispatch($post);
@@ -49,18 +56,13 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Post $post)
+    public function destroy(Post $post): Response
     {
-        try {
-            if ($post->telegram_message_id) {
-                PostDeleted::dispatch($post);
-                //            DeleteTelegramMessage::dispatch($post);
-            }
-            $post->delete();
-
-            return response()->noContent();
-        } catch (\Exception $e) {
-            return response($e->getMessage(), 500);
+        if ($post->telegram_message_id) {
+            PostDeleted::dispatch($post);
         }
+        $post->delete();
+
+        return response()->noContent();
     }
 }

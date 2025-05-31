@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 class PostTest extends TestCase
@@ -25,16 +26,19 @@ class PostTest extends TestCase
             'password' => Hash::make('password'),
         ]);
 
-        $token = $user->createToken('test-token')->plainTextToken;
+        $response = $this->actingAs($user)
+            ->postJson('/api/posts', [
+                'title' => 'Test Post Title',
+                'body' => 'Test Post Body',
+            ]);
 
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer '.$token,
-        ])->postJson('/api/posts', [
-            'title' => 'Test Post Title',
-            'body' => 'Test Post Body',
-        ]);
-
-        $response->assertCreated();
+        $response
+            ->assertCreated()
+            ->assertJson(function (AssertableJson $json) {
+                $json->has('data', function (AssertableJson $json) {
+                    $this->assertSingleStructure($json);
+                });
+            });
 
         Event::assertDispatched(PostCreated::class);
 
@@ -133,15 +137,32 @@ class PostTest extends TestCase
     public function test_user_can_view_all_posts()
     {
         $user = User::factory()->create();
-        $token = $user->createToken('test-token')->plainTextToken;
 
         Post::factory()->count(3)->create(['user_id' => $user->id]);
 
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer '.$token,
-        ])->getJson('/api/posts');
+        $this
+            ->actingAs($user)
+            ->get('/api/posts')
+            ->assertOk()
+            ->assertJson(function (AssertableJson $json) {
+                $json
+                    ->count('data', 3)
+                    ->has('data', function (AssertableJson $json) {
+                        $json->each(function (AssertableJson $json) {
+                            $this->assertSingleStructure($json);
+                        });
+                    })->etc();
+            });
+    }
 
-        $response->assertOk()
-            ->assertJsonCount(3);
+    private function assertSingleStructure(AssertableJson $json): AssertableJson
+    {
+        return $json->whereAllType([
+            'id' => 'integer',
+            'telegram_message_id' => 'integer|null',
+            'title' => 'string',
+            'body' => 'string',
+            'user_id' => 'integer',
+        ]);
     }
 }
