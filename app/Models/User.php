@@ -11,6 +11,9 @@ use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string $password
  */
 class User extends Authenticatable
 {
@@ -51,6 +54,9 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * @return HasMany<Post, $this>
+     */
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class);

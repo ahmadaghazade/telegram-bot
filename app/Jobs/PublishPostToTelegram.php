@@ -18,7 +18,7 @@ class PublishPostToTelegram implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    protected $post;
+    protected Post $post;
 
     public function __construct(Post $post)
     {

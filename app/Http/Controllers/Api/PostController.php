@@ -10,12 +10,13 @@ use App\Http\Requests\PostStoreRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
         return PostResource::collection(
             Post::where('user_id', Auth::id())->paginate()
@@ -38,9 +39,9 @@ class PostController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Post $post)
+    public function show(Post $post): PostResource
     {
-        return response()->json($post);
+        return new PostResource($post);
     }
 
     /**

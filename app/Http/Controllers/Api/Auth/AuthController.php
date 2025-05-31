@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request): array
+    public function register(RegisterRequest $request): UserResource
     {
 
         $user = User::create([
@@ -22,15 +23,11 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return [
-            'message' => 'User created successfully',
-            'user' => $user,
-            'token' => $token,
-        ];
+        return (new UserResource($user))->additional(['token' => $token]);
 
     }
 
-    public function login(LoginRequest $request): array|Response
+    public function login(LoginRequest $request): Response|UserResource
     {
 
         if (! Auth::attempt($request->only('email', 'password'))) {
@@ -43,11 +40,7 @@ class AuthController extends Controller
         //            $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return [
-            'message' => 'User logged in successfully',
-            'user' => $user,
-            'token' => $token,
-        ];
+        return (new UserResource($user))->additional(['token' => $token, 'message' => 'User logged in successfully']);
     }
 
     public function logout(): \Illuminate\Http\Response
