@@ -38,5 +38,12 @@ return [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
         'channel' => env('TELEGRAM_CHANNEL'),
     ],
+    'tumblr' => [
+        'consumer_key' => env('TUMBLR_CONSUMER_KEY'),
+        'consumer_secret' => env('TUMBLR_CONSUMER_SECRET'),
+        'token' => env('TUMBLR_OAUTH_TOKEN'),
+        'token_secret' => env('TUMBLR_OAUTH_TOKEN_SECRET'),
+        'blog_hostname' => env('TUMBLR_BLOG_HOSTNAME'),
+    ],
 
 ];

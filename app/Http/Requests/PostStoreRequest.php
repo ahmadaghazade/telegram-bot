@@ -2,9 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Post;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @mixin Post
+ */
 class PostStoreRequest extends FormRequest
 {
     /**
@@ -25,6 +29,7 @@ class PostStoreRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png', 'max:2048'],
         ];
     }
 }

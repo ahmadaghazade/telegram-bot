@@ -25,10 +25,13 @@ class PostController extends Controller
 
     public function store(PostStoreRequest $request): PostResource
     {
+        $path = $request->file('image')?->store('images', 'public');
+
         $post = Post::create([
             'user_id' => Auth::id(),
             'title' => $request->title,
             'body' => $request->body,
+            'image' => $path,
         ]);
 
         PostCreated::dispatch($post);

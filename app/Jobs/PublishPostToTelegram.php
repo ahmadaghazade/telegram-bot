@@ -36,17 +36,54 @@ class PublishPostToTelegram implements ShouldQueue
         $channel = config('services.telegram.channel');
 
         $message = "*{$this->post->title}*\n{$this->post->body}";
-        $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
+        $imagePath = storage_path('app/public/'.$this->post->image);
 
         try {
-            $response = Http::withOptions([
-                'proxy' => 'socks5://127.0.0.1:12334',
-                'timeout' => 10,
-            ])->post($url, [
-                'chat_id' => $channel,
-                'text' => $message,
-                'parse_mode' => 'Markdown',
-            ]);
+            if (file_exists(storage_path('app/public/'.$this->post->image))) {
+                $url = "https://api.telegram.org/bot{$botToken}/sendPhoto";
+                $response = Http::withOptions([
+                    'proxy' => 'socks5://127.0.0.1:12334',
+                    'timeout' => 10,
+                ])->attach(
+                    'photo',
+                    file_get_contents($imagePath),
+                    basename($imagePath)
+                )->post($url, [
+                    'chat_id' => $channel,
+                    'caption' => $message,
+                    'parse_mode' => 'Markdown',
+                    'reply_markup' => json_encode([
+                        'inline_keyboard' => [
+                            [
+                                [
+                                    'text' => 'View Post',
+                                    'url' => 'https://novinhub.com/',
+                                ],
+                            ],
+                        ],
+                    ]),
+                ]);
+            } else {
+                $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
+                $response = Http::withOptions([
+                    'proxy' => 'socks5://127.0.0.1:12334',
+                    'timeout' => 10,
+                ])->post($url, [
+                    'chat_id' => $channel,
+                    'text' => $message,
+                    'parse_mode' => 'Markdown',
+                    'reply_markup' => json_encode([
+                        'inline_keyboard' => [
+                            [
+                                [
+                                    'text' => 'View Post',
+                                    'url' => 'https://novinhub.com/',
+                                ],
+                            ],
+                        ],
+                    ]),
+                ]);
+            }
 
             $data = $response->json();
             if (isset($data['result']['message_id'])) {
